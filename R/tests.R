@@ -1,9 +1,10 @@
 library(dplyr)
+library(testthat)
+
 fbi = read.table('data/TestResponses.txt', header = TRUE)
 fbi.test = fbi %>%
   distinct(Mating, Compare_Value, Inconclusive_Reason, .keep_all = TRUE)
 
-library(testthat)
 
 ### ADD NEGATIVE TESTS
 
