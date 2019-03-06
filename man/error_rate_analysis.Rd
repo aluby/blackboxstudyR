@@ -18,5 +18,7 @@ Data frame of avg difficulty, percent of items skipped, FPR, FNR, one row for ea
 Calculate error rates and avg question difficulty for each participant
 }
 \examples{
+\dontrun{
 error_rate_analysis(TestResponses, question_difficulties)
+}
 }

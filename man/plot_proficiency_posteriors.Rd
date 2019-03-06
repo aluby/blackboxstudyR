@@ -9,6 +9,9 @@ plot_proficiency_posteriors(irt_stan_output)
 \arguments{
 \item{irt_stan_output}{Stan object from IRT analysis}
 }
+\value{
+A ggplot object
+}
 \description{
 Plots the proficiency posteriors from IRT analysis
 }

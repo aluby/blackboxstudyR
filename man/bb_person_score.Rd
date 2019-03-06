@@ -18,5 +18,7 @@ Data frame of scores, one row for each participant
 Calculate observed score for each participant
 }
 \examples{
+\dontrun{
 bb_person_score(TestResponses, im_scored)
+}
 }

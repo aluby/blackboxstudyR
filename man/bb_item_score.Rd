@@ -18,5 +18,7 @@ Data frame of scores, one row for each item
 Calculate observed score for each item
 }
 \examples{
+\dontrun{
 bb_item_score(TestResponses, im_scored)
+}
 }

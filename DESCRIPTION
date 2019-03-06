@@ -1,24 +1,31 @@
 Package: blackboxstudyR
-Type: Package
 Title: FBI Black Box Study with IRT
-Version: 0.1.0
-Author: Amanda Luby
-Maintainer: Amanda Luby <aluby@stat.cmu.edu>
+Version: 0.1.0.9000
+Authors@R: 
+    person(given = "Amanda",
+           family = "Luby",
+           role = c("aut", "cre"),
+           email = "aluby@stat.cmu.edu")
 Description: Contains functions for fitting basic IRT models to FBI Black Box Data.
-License: GPL-3
+License: GPL (>=3)
+Depends: 
+    methods,
+    R (>= 3.4.0),
+    Rcpp (>= 1.0.0)
+Imports: 
+    rstan (>= 2.18.2),
+    rstantools (>= 1.5.1),
+    magrittr
+LinkingTo: 
+    BH (>= 1.69.0-1),
+    Rcpp (>= 1.0.0),
+    RcppEigen (>= 0.3.3.5.0),
+    rstan (>= 2.18.2),
+    StanHeaders (>= 2.18.1)
 Encoding: UTF-8
 LazyData: true
-Imports:
-    dplyr,
-    ggplot2,
-    rstan,
-    bayesplot,
-    tidyr,
-    gghighlight,
-    gridExtra
+NeedsCompilation: yes
+SystemRequirements: GNU make
+RoxygenNote: 6.1.1.9000
 Suggests: 
-    knitr, 
-    rmarkdown,
     testthat
-VignetteBuilder: knitr
-RoxygenNote: 6.1.1

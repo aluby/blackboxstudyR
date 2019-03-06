@@ -1,16 +1,16 @@
-library(dplyr)
-library(ggplot2)
-library(rstan)
-
 #' Plots the difficulty posteriors from IRT analysis
 #'
 #' @param irt_stan_output Stan object from IRT analysis
-#' @return
+#' @return A ggplot object
+#'
+#' @importFrom bayesplot mcmc_intervals_data
+#' @importFrom ggplot2 ggplot aes aes_ geom_segment geom_point labs theme scale_y_discrete ggtitle
+#'
 #' @examples
 #' plot_difficulty_posteriors(im_model)
 #' @export
 plot_difficulty_posteriors = function(irt_stan_output) {
-  bayesplot::mcmc_intervals_data(as.array(irt_stan_output),
+  mcmc_intervals_data(as.array(irt_stan_output),
                       regex_pars = 'b',
                       prob_outer = .95) %>%
     ggplot(., aes(
@@ -29,15 +29,15 @@ plot_difficulty_posteriors = function(irt_stan_output) {
 #' Plots the proficiency posteriors from IRT analysis
 #'
 #' @param irt_stan_output Stan object from IRT analysis
-#' @return
+#' @return A ggplot object
 #' @examples
 #' plot_proficiency_posteriors(im_model)
 #' @export
 plot_proficiency_posteriors = function(irt_stan_output) {
-  bayesplot::mcmc_intervals_data(as.array(irt_stan_output),
+  mcmc_intervals_data(as.array(irt_stan_output),
                       regex_pars = 'theta',
                       prob_outer = .95) %>%
-    ggplot(., aes(
+    ggplot( aes(
       y = reorder(parameter, m, FUN = median),
       yend = reorder(parameter, m, FUN = median)
     )) +
