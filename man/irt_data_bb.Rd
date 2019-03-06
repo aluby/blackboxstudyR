@@ -18,5 +18,7 @@ A list in the format needed for fit_irt()
 Format the black box data to fit the IRT model
 }
 \examples{
+\dontrun{
 irt_data_bb(TestResponses, im_scored)
+}
 }

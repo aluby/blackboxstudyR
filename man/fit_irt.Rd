@@ -22,5 +22,7 @@ stan object
 Fit an IRT model
 }
 \examples{
+\dontrun{
 irt_data_bb(TestResponses, im_scored)
+}
 }

@@ -5,9 +5,10 @@ library(rstan)
 #' Plots the difficulty posteriors from IRT analysis
 #'
 #' @param irt_stan_output Stan object from IRT analysis
-#' @return
 #' @examples
+#' \dontrun{
 #' plot_difficulty_posteriors(im_model)
+#' }
 #' @export
 plot_difficulty_posteriors = function(irt_stan_output) {
   bayesplot::mcmc_intervals_data(as.array(irt_stan_output),
@@ -29,9 +30,10 @@ plot_difficulty_posteriors = function(irt_stan_output) {
 #' Plots the proficiency posteriors from IRT analysis
 #'
 #' @param irt_stan_output Stan object from IRT analysis
-#' @return
 #' @examples
+#' \dontrun{
 #' plot_proficiency_posteriors(im_model)
+#' }
 #' @export
 plot_proficiency_posteriors = function(irt_stan_output) {
   bayesplot::mcmc_intervals_data(as.array(irt_stan_output),

@@ -13,5 +13,7 @@ plot_difficulty_posteriors(irt_stan_output)
 Plots the difficulty posteriors from IRT analysis
 }
 \examples{
+\dontrun{
 plot_difficulty_posteriors(im_model)
+}
 }
