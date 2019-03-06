@@ -5,8 +5,20 @@ Version: 0.1.0
 Author: Amanda Luby
 Maintainer: Amanda Luby <aluby@stat.cmu.edu>
 Description: Contains functions for fitting basic IRT models to FBI Black Box Data.
-License: What license is it under?
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Suggests: knitr, rmarkdown
+Imports:
+    dplyr,
+    ggplot2,
+    rstan,
+    bayesplot,
+    tidyr,
+    gghighlight,
+    gridExtra
+Suggests: 
+    knitr, 
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
+RoxygenNote: 6.1.1

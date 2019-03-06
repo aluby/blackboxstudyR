@@ -1,10 +1,34 @@
+library(dplyr)
 library(rstan)
+library(tidyr)
 
+#' Results from FBI "black box" study
+#'
+#' @format A data frame with 17,121 rows and 8 variables
+#' @source <https://www.fbi.gov/services/laboratory/scientific-analysis/counterterrorism-forensic-science-research/black-box-study-results>
+"TestResponses"
+#> [1] "TestResponses"
+
+#' Calculate the mode of a vector
+#'
+#' @param v vector to find mode of
+#' @return The mode of \code{v}
+#' @examples
+#' getmode(c(1,1,1,0,0))
+#' @export
 getmode <- function(v) {
   uniqv <- unique(v)
-  uniqv[which.max(tabulate(match(v, uniqv)))]
+  return(uniqv[which.max(tabulate(match(v, uniqv)))])
 }
 
+#' Score the FBI black box data
+#'
+#' @param fbi_bb_data Dataset of the form of TestResponses
+#' @param scoring_method Which scoring method to use: inconclusive_mcar, inconclusive_incorrect, partial_credit, no_consensus_mcar, no_consensus_incorrect
+#' @return A vector of scored responses (1 row in fbi_bb_data = 1 entry)
+#' @examples
+#' score_bb_data(TestResponses, "inconclusive_mcar")
+#' @export
 score_bb_data = function(fbi_bb_data, scoring_method){
   # Check dims & variables of fbi_bb_data
   scored_vector = rep(NA, nrow(fbi_bb_data))
@@ -50,8 +74,18 @@ score_bb_data = function(fbi_bb_data, scoring_method){
   return(scored_vector)
 }
 
-## Needs check on data
+#' Format the black box data to fit the IRT model
+#'
+#' @param fbi_bb_data Dataset of the form of TestResponses
+#' @param scored_responses Scored responses (result of score_bb_data())
+#' @return A list in the format needed for fit_irt()
+#' @examples
+#' \dontrun{
+#' irt_data_bb(TestResponses, im_scored)
+#' }
+#' @export
 irt_data_bb = function(fbi_bb_data, scored_responses){
+  ## Needs check on data
   if(any(!"Examiner_ID" %in% names(fbi_bb_data), !"Pair_ID" %in% names(fbi_bb_data))){
     stop("FBI Black Box Data required - Examiner_ID or Pair_ID not found.")
   }
@@ -73,7 +107,18 @@ irt_data_bb = function(fbi_bb_data, scored_responses){
   ))
 }
 
-## Needs check on parameters
+#' Fit an IRT model
+#'
+#' @param irt_data List formatted as in irt_data_bb()
+#' @param model Type of IRT model to fit (rasch, 2pl, pcm)
+#' @param iterations Number of MCMC iterations per chain
+#' @param n_chains Number of MCMC chains to run
+#' @return stan object
+#' @examples
+#' \dontrun{
+#' irt_data_bb(TestResponses, im_scored)
+#' }
+#' @export
 fit_irt = function(irt_data, model = "rasch", iterations = 600, n_chains = 4){
   if(!(model %in% c("rasch", "2pl", "pcm"))){
     stop("Model not recognized: try \"rasch\", \"2pl\" or \"pcm\"")
@@ -95,7 +140,16 @@ fit_irt = function(irt_data, model = "rasch", iterations = 600, n_chains = 4){
   return(model)
 }
 
-
+#' Calculate observed score for each participant
+#'
+#' @param fbi_bb_data Dataset of the form of TestResponses
+#' @param scored_responses Scored responses (result of score_bb_data())
+#' @return Data frame of scores, one row for each participant
+#' @examples
+#' \dontrun{
+#' bb_person_score(TestResponses, im_scored)
+#' }
+#' @export
 bb_person_score = function(fbi_bb_data, scored_responses){
   if(nrow(fbi_bb_data)!=length(scored_responses)){
     stop("scored_responses incorrect length - must match data.")
@@ -113,6 +167,16 @@ bb_person_score = function(fbi_bb_data, scored_responses){
   return(res)
 }
 
+#' Calculate observed score for each item
+#'
+#' @param fbi_bb_data Dataset of the form of TestResponses
+#' @param scored_responses Scored responses (result of score_bb_data())
+#' @return Data frame of scores, one row for each item
+#' @examples
+#' \dontrun{
+#' bb_item_score(TestResponses, im_scored)
+#' }
+#' @export
 bb_item_score = function(fbi_bb_data, scored_responses){
   if(nrow(fbi_bb_data)!=length(scored_responses)){
     stop("scored_responses incorrect length - must match data.")
@@ -133,4 +197,67 @@ bb_item_score = function(fbi_bb_data, scored_responses){
     res$score = res$score/max(scored_responses, na.rm = TRUE)
   }
   return(res)
+}
+
+#' Calculate error rates and avg question difficulty for each participant
+#'
+#' @param fbi_bb_data Dataset of the form of TestResponses
+#' @param q_diff Question difficulty (from IRT analysis)
+#' @return Data frame of avg difficulty, percent of items skipped, FPR, FNR, one row for each participant
+#' @examples
+#' \dontrun{
+#' error_rate_analysis(TestResponses, question_difficulties)
+#' }
+#' @export
+error_rate_analysis = function(fbi_bb_data, q_diff){
+  qID = as.numeric(fbi_bb_data$Pair_ID)
+  exID = as.numeric(fbi_bb_data$Examiner_ID)
+  q_diff = q_diff[qID]
+  is.skipped = fbi_bb_data$Latent_Value == 'NV' | fbi_bb_data$Compare_Value == 'Inconclusive'
+  false.pos = fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Non-mates'
+  false.neg = fbi_bb_data$Compare_Value == 'Exclusion' & fbi_bb_data$Mating == 'Mates'
+  ex_resp_data = data.frame(exID = 1:169,
+                            avg_diff = rep(NA, 169),
+                            pct_skipped = rep(NA, 169),
+                            fpr = rep(NA, 169),
+                            fnr = rep(NA, 169))
+  for(ex in unique(exID)){
+    ex_resp_data$avg_diff[ex] = mean(q_diff[which(exID == ex)], na.rm = TRUE)
+    ex_resp_data$pct_skipped[ex] = sum(is.skipped[which(exID == ex)]) / sum(exID == ex)
+    ex_resp_data$fpr[ex] = sum(false.pos[which(exID == ex)], na.rm = TRUE) /
+      sum(!is.skipped[which(exID == ex)])
+    ex_resp_data$fnr[ex] = sum(false.neg[which(exID == ex)], na.rm = TRUE) /
+      sum(!is.skipped[which(exID == ex)])
+  }
+  return(ex_resp_data)
+}
+
+#' Calculate MCMC intervals for participant estimates
+#'
+#' @param stan_model_output Stan object from an IRT analysis
+#' @return Tibble of 50% and 95% posterior intervals for each theta estimate
+#' @examples
+#' person_mcmc_intervals(im_model)
+#' @export
+person_mcmc_intervals = function(stan_model_output){
+  intervals = bayesplot::mcmc_intervals_data(as.array(stan_model_output),
+                      regex_pars = 'theta',
+                      prob_outer = .95) %>%
+    mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
+  return(intervals)
+}
+
+#' Calculate MCMC intervals for item estimates
+#'
+#' @param stan_model_output Stan object from an IRT analysis
+#' @return Tibble of 50% and 95% posterior intervals for each b estimate
+#' @examples
+#' item_mcmc_intervals(im_model)
+#' @export
+item_mcmc_intervals = function(stan_model_output){
+  intervals = bayesplot::mcmc_intervals_data(as.array(stan_model_output),
+                                  regex_pars = 'b',
+                                  prob_outer = .95) %>%
+    mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
+  return(intervals)
 }
