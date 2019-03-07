@@ -1,4 +1,4 @@
-# blackboxstudyR
+# blackboxstudyR <img src='man/figures/logo.png' align='right' height='139'>
 
 `blackboxstudyR` is an R package for fitting basic item response theory (IRT) models to FBI Black Box [Data](inst/extdata/TestResponses.txt).
 
