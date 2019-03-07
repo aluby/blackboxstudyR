@@ -9,6 +9,9 @@ plot_difficulty_posteriors(irt_stan_output)
 \arguments{
 \item{irt_stan_output}{Stan object from IRT analysis}
 }
+\value{
+A ggplot object
+}
 \description{
 Plots the difficulty posteriors from IRT analysis
 }

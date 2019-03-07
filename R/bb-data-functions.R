@@ -107,6 +107,9 @@ irt_data_bb = function(fbi_bb_data, scored_responses){
 #' @param iterations Number of MCMC iterations per chain
 #' @param n_chains Number of MCMC chains to run
 #' @return stan object
+#'
+#' @importFrom rstan stan
+#'
 #' @examples
 #' \dontrun{
 #' irt_data_bb(TestResponses, im_scored)
@@ -229,13 +232,16 @@ error_rate_analysis = function(fbi_bb_data, q_diff){
 #'
 #' @param stan_model_output Stan object from an IRT analysis
 #' @return Tibble of 50% and 95% posterior intervals for each theta estimate
+#'
+#' @importFrom bayesplot mcmc_intervals_data
+#'
 #' @examples
 #' \dontrun{
 #' person_mcmc_intervals(im_model)
 #' }
 #' @export
 person_mcmc_intervals = function(stan_model_output){
-  intervals = bayesplot::mcmc_intervals_data(as.array(stan_model_output),
+  intervals = mcmc_intervals_data(as.array(stan_model_output),
                       regex_pars = 'theta',
                       prob_outer = .95) %>%
     dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
@@ -252,7 +258,7 @@ person_mcmc_intervals = function(stan_model_output){
 #' }
 #' @export
 item_mcmc_intervals = function(stan_model_output){
-  intervals = bayesplot::mcmc_intervals_data(as.array(stan_model_output),
+  intervals = mcmc_intervals_data(as.array(stan_model_output),
                                   regex_pars = 'b',
                                   prob_outer = .95) %>%
     dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
