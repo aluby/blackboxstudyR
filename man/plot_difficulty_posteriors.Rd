@@ -16,5 +16,7 @@ A ggplot object
 Plots the difficulty posteriors from IRT analysis
 }
 \examples{
+\dontrun{
 plot_difficulty_posteriors(im_model)
+}
 }

@@ -7,7 +7,9 @@
 #' @importFrom ggplot2 ggplot aes aes_ geom_segment geom_point labs theme scale_y_discrete ggtitle
 #'
 #' @examples
+#' \dontrun{
 #' plot_difficulty_posteriors(im_model)
+#' }
 #' @export
 plot_difficulty_posteriors = function(irt_stan_output) {
   mcmc_intervals_data(as.array(irt_stan_output),
@@ -31,7 +33,9 @@ plot_difficulty_posteriors = function(irt_stan_output) {
 #' @param irt_stan_output Stan object from IRT analysis
 #' @return A ggplot object
 #' @examples
+#' \dontrun{
 #' plot_proficiency_posteriors(im_model)
+#' }
 #' @export
 plot_proficiency_posteriors = function(irt_stan_output) {
   mcmc_intervals_data(as.array(irt_stan_output),

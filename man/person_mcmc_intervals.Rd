@@ -16,5 +16,7 @@ Tibble of 50% and 95% posterior intervals for each theta estimate
 Calculate MCMC intervals for participant estimates
 }
 \examples{
+\dontrun{
 person_mcmc_intervals(im_model)
+}
 }

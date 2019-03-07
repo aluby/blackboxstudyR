@@ -16,5 +16,7 @@ Tibble of 50% and 95% posterior intervals for each b estimate
 Calculate MCMC intervals for item estimates
 }
 \examples{
+\dontrun{
 item_mcmc_intervals(im_model)
+}
 }

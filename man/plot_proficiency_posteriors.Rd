@@ -16,5 +16,7 @@ A ggplot object
 Plots the proficiency posteriors from IRT analysis
 }
 \examples{
+\dontrun{
 plot_proficiency_posteriors(im_model)
+}
 }

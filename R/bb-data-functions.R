@@ -1,19 +1,6 @@
-#' Results from FBI "black box" study
-#'
-#' @format A data frame with 17,121 rows and 8 variables
-#' \describe{
-#'   \item{Examiner_ID}{}
-#'   \item{Pair_ID}{}
-#'   \item{Mating}{}
-#'   \item{Latent_Value}{}
-#'   \item{Compare_Value}{}
-#'   \item{Inconclusive_Reason}{If Compare_Value is Inconclusive, what is the reason given?}
-#'   \item{Exclusion_Reason}{If Compare_Value is Exclusion, what is the reason given?}
-#'   \item{Difficulty}{}
-#' }
-#' @source \url{https://www.fbi.gov/services/laboratory/scientific-analysis/counterterrorism-forensic-science-research/black-box-study-results}
-"TestResponses"
-
+library(dplyr)
+library(rstan)
+library(tidyr)
 
 #' Calculate the mode of a vector
 #'
@@ -136,15 +123,15 @@ fit_irt = function(irt_data, model = "rasch", iterations = 600, n_chains = 4){
     stop("Data does not contain necessary elements, try irt_data_bb(..)")
   }
   if(model == "rasch"){
-    model = stan(system.file("src/stan-files/rasch.stan", package = "blackboxstudyR"), data = irt_data, iter = iterations, chains = n_chains)
+    model = rstan::stan("../src/stan-files/rasch.stan", data = irt_data, iter = iterations, chains = n_chains)
   }
   else
     if(model == "2pl"){
-      model = stan(system.file("src/stan-files/2pl.stan", package = "blackboxstudyR"), data = irt_data, iter = iterations, chains = n_chains)
+      model = rstan::stan("../src/stan-files/2pl.stan", data = irt_data, iter = iterations, chains = n_chains)
     }
   else
     if(model == "pcm"){
-      model = stan(system.file("src/stan-files/pcm.stan", package = "blackboxstudyR"), data = irt_data, iter = iterations, chains = n_chains)
+      model = rstan::stan("../src/stan-files/pcm.stan", data = irt_data, iter = iterations, chains = n_chains)
     }
   return(model)
 }
@@ -249,13 +236,15 @@ error_rate_analysis = function(fbi_bb_data, q_diff){
 #' @importFrom bayesplot mcmc_intervals_data
 #'
 #' @examples
+#' \dontrun{
 #' person_mcmc_intervals(im_model)
+#' }
 #' @export
 person_mcmc_intervals = function(stan_model_output){
   intervals = mcmc_intervals_data(as.array(stan_model_output),
                       regex_pars = 'theta',
                       prob_outer = .95) %>%
-    mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
+    dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
   return(intervals)
 }
 
@@ -264,12 +253,14 @@ person_mcmc_intervals = function(stan_model_output){
 #' @param stan_model_output Stan object from an IRT analysis
 #' @return Tibble of 50% and 95% posterior intervals for each b estimate
 #' @examples
+#' \dontrun{
 #' item_mcmc_intervals(im_model)
+#' }
 #' @export
 item_mcmc_intervals = function(stan_model_output){
   intervals = mcmc_intervals_data(as.array(stan_model_output),
                                   regex_pars = 'b',
                                   prob_outer = .95) %>%
-    mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
+    dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
   return(intervals)
 }
