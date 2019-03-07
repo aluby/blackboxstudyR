@@ -1,7 +1,3 @@
-library(dplyr)
-library(rstan)
-library(tidyr)
-
 #' Calculate the mode of a vector
 #'
 #' @param v vector to find mode of
@@ -27,28 +23,28 @@ score_bb_data = function(fbi_bb_data, scoring_method){
   scored_vector = rep(NA, nrow(fbi_bb_data))
   if(scoring_method == "inconclusive_mcar"){
     scored_vector = as.integer((fbi_bb_data$Compare_Value == 'Exclusion' & fbi_bb_data$Mating == 'Non-mates') |
-      (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates'))
+                                 (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates'))
     scored_vector[fbi_bb_data$Compare_Value == 'Inconclusive'] = NA
   }
   else
-  if(scoring_method == "inconclusive_incorrect"){
+    if(scoring_method == "inconclusive_incorrect"){
       scored_vector = as.integer((fbi_bb_data$Compare_Value == 'Exclusion' & fbi_bb_data$Mating == 'Non-mates') |
-        (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates'))
+                                   (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates'))
       scored_vector[fbi_bb_data$Compare_Value == 'Inconclusive'] = 0
-  }
+    }
   else
-  if(scoring_method == "partial_credit"){
-    scored_vector = 2*as.integer((fbi_bb_data$Compare_Value == 'Exclusion' & fbi_bb_data$Mating == 'Non-mates') |
-      (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates'))
-    scored_vector[fbi_bb_data$Compare_Value == 'Inconclusive'] = 1
-  }
+    if(scoring_method == "partial_credit"){
+      scored_vector = 2*as.integer((fbi_bb_data$Compare_Value == 'Exclusion' & fbi_bb_data$Mating == 'Non-mates') |
+                                     (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates'))
+      scored_vector[fbi_bb_data$Compare_Value == 'Inconclusive'] = 1
+    }
   else{
     consensus_reason = rep(NA, nrow(fbi_bb_data))
-  for(resp in 1:nrow(fbi_bb_data)){
-    pair_id = fbi_bb_data$Pair_ID[resp]
-    # Pull reasons for inconclusives for that pair ID EXCLUDING current response
-    consensus_reason[resp] = getmode(fbi_bb_data$Inconclusive_Reason[-resp][fbi_bb_data$Pair_ID[-resp] == pair_id])
-  }
+    for(resp in 1:nrow(fbi_bb_data)){
+      pair_id = fbi_bb_data$Pair_ID[resp]
+      # Pull reasons for inconclusives for that pair ID EXCLUDING current response
+      consensus_reason[resp] = getmode(fbi_bb_data$Inconclusive_Reason[-resp][fbi_bb_data$Pair_ID[-resp] == pair_id])
+    }
     if(scoring_method == "no_consensus_mcar"){
       scored_vector = as.integer((fbi_bb_data$Compare_Value == 'Exclusion' & fbi_bb_data$Mating == 'Non-mates') |
                                    (fbi_bb_data$Compare_Value == 'Individualization' & fbi_bb_data$Mating == 'Mates') |
@@ -62,7 +58,7 @@ score_bb_data = function(fbi_bb_data, scoring_method){
                                      (fbi_bb_data$Compare_Value == "Inconclusive" & as.integer(fbi_bb_data$Inconclusive_Reason) == consensus_reason))
         scored_vector[fbi_bb_data$Compare_Value=='Inconclusive' & is.na(consensus_reason)] = 0
       }
-
+    
   }
   return(scored_vector)
 }
@@ -71,7 +67,7 @@ score_bb_data = function(fbi_bb_data, scoring_method){
 #'
 #' @param fbi_bb_data Dataset of the form of TestResponses
 #' @param scored_responses Scored responses (result of score_bb_data())
-#' @return A list in the format needed for fit_irt()
+#' @return A list in the format needed for fit_MODEL()
 #' @examples
 #' \dontrun{
 #' irt_data_bb(TestResponses, im_scored)
@@ -98,42 +94,6 @@ irt_data_bb = function(fbi_bb_data, scored_responses){
     ii = qID,
     jj = exID
   ))
-}
-
-#' Fit an IRT model
-#'
-#' @param irt_data List formatted as in irt_data_bb()
-#' @param model Type of IRT model to fit (rasch, 2pl, pcm)
-#' @param iterations Number of MCMC iterations per chain
-#' @param n_chains Number of MCMC chains to run
-#' @return stan object
-#'
-#' @importFrom rstan stan
-#'
-#' @examples
-#' \dontrun{
-#' irt_data_bb(TestResponses, im_scored)
-#' }
-#' @export
-fit_irt = function(irt_data, model = "rasch", iterations = 600, n_chains = 4){
-  if(!(model %in% c("rasch", "2pl", "pcm"))){
-    stop("Model not recognized: try \"rasch\", \"2pl\" or \"pcm\"")
-  }
-  if(!any(c("y", "ii", "jj", "N", "J", "I") %in% names(irt_data))){
-    stop("Data does not contain necessary elements, try irt_data_bb(..)")
-  }
-  if(model == "rasch"){
-    model = rstan::stan("../src/stan-files/rasch.stan", data = irt_data, iter = iterations, chains = n_chains)
-  }
-  else
-    if(model == "2pl"){
-      model = rstan::stan("../src/stan-files/2pl.stan", data = irt_data, iter = iterations, chains = n_chains)
-    }
-  else
-    if(model == "pcm"){
-      model = rstan::stan("../src/stan-files/pcm.stan", data = irt_data, iter = iterations, chains = n_chains)
-    }
-  return(model)
 }
 
 #' Calculate observed score for each participant
@@ -185,10 +145,10 @@ bb_item_score = function(fbi_bb_data, scored_responses){
                    n_ans = rep(NA, length(qID)))
   for(qq in 1:length(unique(qID))){
     res$score[which(qID == qq)] = mean(scored_responses[which(fbi_qID == qq)],
-                                    na.rm = TRUE)
+                                       na.rm = TRUE)
     res$pct_na[which(qID == qq)] = mean(is.na(scored_responses[which(fbi_qID == qq)]))
     res$n_ans[which(qID == qq)] = length(scored_responses[which(fbi_qID == qq)])
-    }
+  }
   if(max(scored_responses, na.rm = TRUE)>1){
     res$score = res$score/max(scored_responses, na.rm = TRUE)
   }
@@ -242,8 +202,8 @@ error_rate_analysis = function(fbi_bb_data, q_diff){
 #' @export
 person_mcmc_intervals = function(stan_model_output){
   intervals = mcmc_intervals_data(as.array(stan_model_output),
-                      regex_pars = 'theta',
-                      prob_outer = .95) %>%
+                                  regex_pars = 'theta',
+                                  prob_outer = .95) %>%
     dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
   return(intervals)
 }

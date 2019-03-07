@@ -12,7 +12,7 @@ irt_data_bb(fbi_bb_data, scored_responses)
 \item{scored_responses}{Scored responses (result of score_bb_data())}
 }
 \value{
-A list in the format needed for fit_irt()
+A list in the format needed for fit_MODEL()
 }
 \description{
 Format the black box data to fit the IRT model

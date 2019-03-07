@@ -1,0 +1,26 @@
+---
+title: "Fitting a Rasch Model"
+output: html_vignette
+vignette: >
+  %\VignetteIndexEntry{Fitting a Rasch Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+We'll proceed with an IRT analysis of the data under the `inconclusive_mcar` scoring scheme, which is how the data were scored under @ulery2011. 
+
+```{r}
+im_scored = score_bb_data(TestResponses, "inconclusive_mcar")
+```
+
+Scoring the black box data as above gives us the response variable ($y$). The `irt_data_bb` function takes the original black box data, along with the scored variable produced by `score_bb_data`, and produces a list object in the form needed by Stan to fit the IRT models. If you wish to fit the models on a different set of data, you can do so if the dataset has been formatted as a list object with the same attributes as the `irt_data_bb` function output (see package documentation for additional details).
+
+```{r, cache = TRUE, echo = TRUE}
+im_data = irt_data_bb(TestResponses, im_scored)
+```
+
+We can now use `fit_rasch` to fit the Rasch models. 
+
+```{r, eval = FALSE, message = FALSE, echo = TRUE}
+im_model = fit_rasch(im_data)
+```
