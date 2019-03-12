@@ -58,7 +58,7 @@ score_bb_data = function(fbi_bb_data, scoring_method){
                                      (fbi_bb_data$Compare_Value == "Inconclusive" & as.integer(fbi_bb_data$Inconclusive_Reason) == consensus_reason))
         scored_vector[fbi_bb_data$Compare_Value=='Inconclusive' & is.na(consensus_reason)] = 0
       }
-    
+
   }
   return(scored_vector)
 }
@@ -190,18 +190,18 @@ error_rate_analysis = function(fbi_bb_data, q_diff){
 
 #' Calculate MCMC intervals for participant estimates
 #'
-#' @param stan_model_output Stan object from an IRT analysis
+#' @param mcmc_samples Array of Stan output from IRT analysis
 #' @return Tibble of 50% and 95% posterior intervals for each theta estimate
 #'
 #' @importFrom bayesplot mcmc_intervals_data
 #'
 #' @examples
 #' \dontrun{
-#' person_mcmc_intervals(im_model)
+#' person_mcmc_intervals(im_samples)
 #' }
 #' @export
-person_mcmc_intervals = function(stan_model_output){
-  intervals = mcmc_intervals_data(as.array(stan_model_output),
+person_mcmc_intervals = function(mcmc_samples){
+  intervals = mcmc_intervals_data(mcmc_samples,
                                   regex_pars = 'theta',
                                   prob_outer = .95) %>%
     dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))
@@ -210,15 +210,15 @@ person_mcmc_intervals = function(stan_model_output){
 
 #' Calculate MCMC intervals for item estimates
 #'
-#' @param stan_model_output Stan object from an IRT analysis
+#' @param mcmc_samples Array of Stan output from IRT analysis
 #' @return Tibble of 50% and 95% posterior intervals for each b estimate
 #' @examples
 #' \dontrun{
-#' item_mcmc_intervals(im_model)
+#' item_mcmc_intervals(im_samples)
 #' }
 #' @export
-item_mcmc_intervals = function(stan_model_output){
-  intervals = mcmc_intervals_data(as.array(stan_model_output),
+item_mcmc_intervals = function(mcmc_samples){
+  intervals = mcmc_intervals_data(mcmc_samples,
                                   regex_pars = 'b',
                                   prob_outer = .95) %>%
     dplyr::mutate(., exID = as.integer(substr(parameter, 7, nchar(as.character(parameter)) - 1)))

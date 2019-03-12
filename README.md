@@ -13,4 +13,10 @@ devtools::install_github("aluby/blackboxstudyR")
 
 ## Usage 
 
-TBD
+Usage consists of three steps: (1) Score the data, (2) Format a data list, (3) Fit the IRT model. 
+
+```r
+im_scored = score_bb_data(TestResponses, "inconclusive_mcar")
+im_data = irt_data_bb(TestResponses, im_scored)
+im_model = fit_rasch(im_data)
+```
